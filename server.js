@@ -1,30 +1,3 @@
-#!/usr/bin/env node
-'use strict';
-/*
- * Minimal zero-dependency HTTP relay (single file).
- *
- * A TLS-terminating reverse proxy (nginx / caddy / tunnel) sits in front;
- * this process speaks plain HTTP only. Handles three client request modes.
- *
- * Env:
- *   PORT          listen port            default 3000
- *   HOST          listen address         default 127.0.0.1
- *   ID            access id (uuid)       default below
- *   XPATH         path prefix            default /nvle
- *   MAX_CONN      max concurrent         default 1024
- *   ALLOW_PRIVATE set 1 to allow LAN     default off (SSRF guard)
- *   LOG           silent|info|debug      default info
- *
- * nginx hints (otherwise downstream gets buffered and the fragmented
- * upload mode stalls):
- *   location /nvle/ {
- *     proxy_pass http://127.0.0.1:3000;
- *     proxy_http_version 1.1;
- *     proxy_request_buffering off;
- *     proxy_read_timeout 300s;
- *   }
- */
-
 const http = require('http');
 const net = require('net');
 const dgram = require('dgram');
@@ -35,7 +8,7 @@ const { EventEmitter } = require('events');
 // ---------------------------------------------------------------- config
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
-const HOST = process.env.HOST || '127.0.0.1';
+const HOST = process.env.HOST || '0.0.0.0';
 const XPATH = (process.env.XPATH || '/nvle').replace(/\/+$/, '');
 const MAX_CONN = parseInt(process.env.MAX_CONN || '1024', 10);
 const ALLOW_PRIVATE = process.env.ALLOW_PRIVATE === '1';
